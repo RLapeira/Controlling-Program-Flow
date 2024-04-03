@@ -6,14 +6,20 @@ namespace WiredBrainCoffeeSurveys.Reports
     {
         static void Main(string[] args)
         {
+            GenerateTasksReport();
+
+        }
+
+        public static void GenerateTasksReport()
+        {
             var tasks = new List<string>();
-            
+
             // Calculated Values
             double responseRate = Q1Results.NumberResponded / Q1Results.NumberSurveyed;
             double overallScore = (Q1Results.ServiceScore + Q1Results.CoffeeScore
                 + Q1Results.FoodScore + Q1Results.PriceScore) / 4;
 
-            if(Q1Results.CoffeeScore > Q1Results.FoodScore)
+            if (Q1Results.CoffeeScore > Q1Results.FoodScore)
             {
                 tasks.Add("Investigate coffee recipes and ingredients.");
             }
@@ -58,7 +64,6 @@ namespace WiredBrainCoffeeSurveys.Reports
                     tasks.Add("Investigate individual comments for ideas.");
                     break;
             }
-
         }
     }
 }
