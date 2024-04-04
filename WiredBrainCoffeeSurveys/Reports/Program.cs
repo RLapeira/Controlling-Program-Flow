@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace WiredBrainCoffeeSurveys.Reports
 {
@@ -13,16 +15,22 @@ namespace WiredBrainCoffeeSurveys.Reports
                 Console.WriteLine("Please specify a report to run (rewards, comments, tasks, quit):");
                 var selectedReport = Console.ReadLine();
 
+                Console.WriteLine("Please specify which quarter of data: (q1, q2)");
+                var selectedData = Console.ReadLine();
+
+                var surveyResults = JsonConverter.DeserializeObject<SurveyResults>
+                    (File.ReadAllText($"data/{selectedData}.json"));
+
                 switch (selectedReport)
                 {
                     case "rewards":
-                        GenerateWinnerEmails();
+                        GenerateWinnerEmails(surveyResults);
                         break;
                     case "comments":
-                        GenerateTasksReport();
+                        GenerateTasksReport(surveyResults);
                         break;
                     case "tasks":
-                        GenerateCommentsReport();
+                        GenerateCommentsReport(surveyResults);
                         break;
                     case "quit":
                         quitApp = true;
@@ -36,14 +44,14 @@ namespace WiredBrainCoffeeSurveys.Reports
             while (!quitApp);
         }
 
-        private static void GenerateWinnerEmails()
+        private static void GenerateWinnerEmails(SurveyResults results)
         {
             var selectedEmails = new List<string>();
             int counter = 0;
 
-            while (selectedEmails.Count < 2 && counter < Q1Results.Responses.Count)
+            while (selectedEmails.Count < 2 && counter < results.Responses.Count)
             {
-                var currentItem = Q1Results.Responses[counter];
+                var currentItem = results.Responses[counter];
 
                 if (currentItem.FavoriteProduct == "Cappucino")
                 {
@@ -55,11 +63,11 @@ namespace WiredBrainCoffeeSurveys.Reports
             }
         }
 
-        private static void GenerateCommentsReport()
+        private static void GenerateCommentsReport(SurveyResults results)
         {
-            for (var i = 0; i < Q1Results.Responses.Count; i++)
+            for (var i = 0; i < results.Responses.Count; i++)
             {
-                var currentResponse = Q1Results.Responses[i];
+                var currentResponse = results.Responses[i];
 
                 if (currentResponse.WouldRecommend < 7.0)
                 {
@@ -67,11 +75,11 @@ namespace WiredBrainCoffeeSurveys.Reports
                 }
             }
 
-            foreach (var response in Q1Results.Responses)
+            foreach (var response in results.Responses)
             {
-                if (response.AreaToImprove == Q1Results.AreaToImprove)
+                if (response.AreaToImprove == results.AreaToImprove)
                 {
-                    if (response.AreaToImprove == Q1Results.AreaToImprove)
+                    if (response.AreaToImprove == results.AreaToImprove)
                     {
                         Console.WriteLine(response.Comments);
                     }
@@ -79,16 +87,16 @@ namespace WiredBrainCoffeeSurveys.Reports
             }
         }
 
-        public static void GenerateTasksReport()
+        public static void GenerateTasksReport(SurveyResults results)
         {
             var tasks = new List<string>();
 
             // Calculated Values
-            double responseRate = Q1Results.NumberResponded / Q1Results.NumberSurveyed;
-            double overallScore = (Q1Results.ServiceScore + Q1Results.CoffeeScore
-                + Q1Results.FoodScore + Q1Results.PriceScore) / 4;
+            double responseRate = results.NumberResponded / results.NumberSurveyed;
+            double overallScore = (results.ServiceScore + results.CoffeeScore
+                + results.FoodScore + results.PriceScore) / 4;
 
-            if (Q1Results.CoffeeScore > Q1Results.FoodScore)
+            if (results.CoffeeScore > results.FoodScore)
             {
                 tasks.Add("Investigate coffee recipes and ingredients.");
             }
@@ -115,7 +123,7 @@ namespace WiredBrainCoffeeSurveys.Reports
                 tasks.Add("Reward participants with discount coffee coupon.");
             }
 
-            switch (Q1Results.AreaToImprove)
+            switch (results.AreaToImprove)
             {
                 case "RewardsProgram":
                     tasks.Add("Revisit the rewards deals.");
