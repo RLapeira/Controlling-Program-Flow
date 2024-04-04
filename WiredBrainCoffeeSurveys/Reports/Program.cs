@@ -6,6 +6,22 @@ namespace WiredBrainCoffeeSurveys.Reports
     {
         static void Main(string[] args)
         {
+            var selectedEmails = new List<string>();
+            int counter = 0;
+
+            while (selectedEmails.Count < 2 && counter < Q1Results.Responses.Count)
+            {
+                var currentItem = Q1Results.Responses[counter];
+
+                if (currentItem.FavoriteProduct == "Cappucino")
+                {
+                    selectedEmails.Add(currentItem.EmailAddress);
+                    Console.WriteLine(currentItem.EmailAddress);
+                }
+
+                counter++;
+            }
+            
             GenerateTasksReport();
             GenerateCommentsReport();
         }
