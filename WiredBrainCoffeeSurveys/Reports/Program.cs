@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace WiredBrainCoffeeSurveys.Reports
 {
@@ -6,104 +8,39 @@ namespace WiredBrainCoffeeSurveys.Reports
     {
         static void Main(string[] args)
         {
-            var selectedEmails = new List<string>();
-            int counter = 0;
+            bool quitApp = false;
 
-            while (selectedEmails.Count < 2 && counter < Q1Results.Responses.Count)
+            do
             {
-                var currentItem = Q1Results.Responses[counter];
+                Console.WriteLine("Please specify a report to run (rewards, comments, tasks, quit):");
+                var selectedReport = Console.ReadLine();
 
-                if (currentItem.FavoriteProduct == "Cappucino")
+                Console.WriteLine("Please specify which quarter of data: (q1, q2)");
+                var selectedData = Console.ReadLine();
+
+                var surveyResults = SurveyDataService.GetSurveyDataByFileName(selectedFile);
+
+                switch (selectedReport)
                 {
-                    selectedEmails.Add(currentItem.EmailAddress);
-                    Console.WriteLine(currentItem.EmailAddress);
+                    case "rewards":
+                        RewardsReportService.GenerateWinnerEmails(surveyResults);
+                        break;
+                    case "comments":
+                        CommentsReportService.GenerateCommentsReport(surveyResults);
+                        break;
+                    case "tasks":
+                        TasksReportService.GenerateTasksReport(surveyResults);
+                        break;
+                    case "quit":
+                        quitApp = true;
+                        break;
+                    default:
+                        Console.WriteLine("Sorry, that's not a valid option.");
+                        break;
                 }
-
-                counter++;
+                Console.WriteLine();
             }
-            
-            GenerateTasksReport();
-            GenerateCommentsReport();
-        }
-
-        private static void GenerateCommentsReport()
-        {
-            for (var i = 0; i < Q1Results.Responses.Count; i++)
-            {
-                var currentResponse = Q1Results.Responses[i];
-
-                if (currentResponse.WouldRecommend < 7.0)
-                {
-                    Console.WriteLine(currentResponse.Comments);
-                }
-            }
-
-            foreach (var response in Q1Results.Responses)
-            {
-                if (response.AreaToImprove == Q1Results.AreaToImprove)
-                {
-                    if (response.AreaToImprove == Q1Results.AreaToImprove)
-                    {
-                        Console.WriteLine(response.Comments);
-                    }
-                }
-            }
-        }
-
-        public static void GenerateTasksReport()
-        {
-            var tasks = new List<string>();
-
-            // Calculated Values
-            double responseRate = Q1Results.NumberResponded / Q1Results.NumberSurveyed;
-            double overallScore = (Q1Results.ServiceScore + Q1Results.CoffeeScore
-                + Q1Results.FoodScore + Q1Results.PriceScore) / 4;
-
-            if (Q1Results.CoffeeScore > Q1Results.FoodScore)
-            {
-                tasks.Add("Investigate coffee recipes and ingredients.");
-            }
-
-            if (overallScore > 8.0)
-            {
-                tasks.Add("Work with leadership to reward staff");
-            }
-            else
-            {
-                tasks.Add("Work with employees for improvement ideas.");
-            }
-
-            if (responseRate < .33)
-            {
-                tasks.Add("Research options to improve response rate.");
-            }
-            else if (responseRate > .33 && responseRate < .66)
-            {
-                tasks.Add("Reward participants with free coffee coupon.");
-            }
-            else
-            {
-                tasks.Add("Reward participants with discount coffee coupon.");
-            }
-
-            switch (Q1Results.AreaToImprove)
-            {
-                case "RewardsProgram":
-                    tasks.Add("Revisit the rewards deals.");
-                    break;
-
-                case "Cleanliness":
-                    tasks.Add("Contact the cleaning vendor.");
-                    break;
-
-                case "MobileApp":
-                    tasks.Add("Contact consulting firm about app.");
-                    break;
-
-                default:
-                    tasks.Add("Investigate individual comments for ideas.");
-                    break;
-            }
+            while (!quitApp);
         }
     }
 }
