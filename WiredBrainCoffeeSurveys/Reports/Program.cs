@@ -61,6 +61,8 @@ namespace WiredBrainCoffeeSurveys.Reports
 
                 counter++;
             }
+
+            File.WriteAllLines("WinnersReport.csv", selectedEmails);
         }
 
         private static void GenerateCommentsReport(SurveyResults results)
@@ -110,37 +112,28 @@ namespace WiredBrainCoffeeSurveys.Reports
                 tasks.Add("Work with employees for improvement ideas.");
             }
 
-            if (responseRate < .33)
+            tasks.Add(responseRate switch
             {
-                tasks.Add("Research options to improve response rate.");
-            }
-            else if (responseRate > .33 && responseRate < .66)
+                var rate when rate < .33 => "Research options to improve response rate.",
+                var rate when rate > .33 && rate < .66 => "Reward participants with free coffee coupon.",
+                var rate when rate > .66 => "Reward participants with discount coffee coupon."
+            });
+
+            tasks.Add(results.AreaToImprove switch
             {
-                tasks.Add("Reward participants with free coffee coupon.");
-            }
-            else
+                "RewardsProgram" => "Revisit the rewards deals.",
+                "Cleanliness" => "Contact the cleaning vendor.",
+                "MobileApp" => "Contact consulting firm about app.",
+                _ => "Investigate individual comments for ideas."
+            });
+
+            Console.WriteLine(Environment.NewLine + "Tasks Output:");
+            foreach (var task in tasks)
             {
-                tasks.Add("Reward participants with discount coffee coupon.");
+                Console.WriteLine(task);
             }
 
-            switch (results.AreaToImprove)
-            {
-                case "RewardsProgram":
-                    tasks.Add("Revisit the rewards deals.");
-                    break;
-
-                case "Cleanliness":
-                    tasks.Add("Contact the cleaning vendor.");
-                    break;
-
-                case "MobileApp":
-                    tasks.Add("Contact consulting firm about app.");
-                    break;
-
-                default:
-                    tasks.Add("Investigate individual comments for ideas.");
-                    break;
-            }
+            File.WriteAllLines("TasksReport.csv", tasks);
         }
     }
 }
